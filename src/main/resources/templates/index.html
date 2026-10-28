@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="common/layout :: head('系统首页 - 停车场管理系统')">
+</head>
+<body>
+<nav th:replace="common/layout :: topbar"></nav>
+<div class="d-flex">
+    <aside th:replace="common/layout :: sidebar('home')"></aside>
+    <main class="flex-grow-1 content-area">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="page-title mb-0">系统首页</h4>
+            <span class="text-muted" style="font-size:13px;">
+                当前时间：<span th:text="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd HH:mm')}">2026-01-01 00:00</span>
+            </span>
+        </div>
+
+        <!-- 欢迎横幅 -->
+        <div class="card mb-4" style="background:linear-gradient(120deg,#1e3a5f,#3a7bd5);">
+            <div class="card-body p-4 text-white">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-p-square-fill" style="font-size:42px;"></i>
+                    <div class="ms-3">
+                        <h5 class="mb-1">
+                            欢迎使用停车场管理系统，
+                            <span th:text="${session.loginUser != null ? session.loginUser.realName : '访客'}">管理员</span>
+                        </h5>
+                        <div class="text-white-50" style="font-size:13px;">
+                            本系统支持车辆进出登记、车位管理、智能计费、订单流转、黑名单拦截与数据统计，实现停车场数字化管理。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 功能快捷入口 -->
+        <h6 class="text-muted mb-3"><i class="bi bi-grid me-1"></i>功能快捷入口</h6>
+        <div class="row g-3">
+            <div class="col-6 col-md-4 col-xl-2">
+                <a th:href="@{/car/record}" class="card text-center text-decoration-none h-100">
+                    <div class="card-body py-4">
+                        <i class="bi bi-car-front" style="font-size:32px;color:#0d6efd;"></i>
+                        <div class="mt-2 fw-semibold" style="color:#333;">车辆进出管理</div>
+                        <div class="text-muted" style="font-size:12px;">入场登记 / 进出记录</div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-xl-2">
+                <a th:href="@{/space/list}" class="card text-center text-decoration-none h-100">
+                    <div class="card-body py-4">
+                        <i class="bi bi-grid-3x3-gap" style="font-size:32px;color:#198754;"></i>
+                        <div class="mt-2 fw-semibold" style="color:#333;">车位管理</div>
+                        <div class="text-muted" style="font-size:12px;">车位状态 / 区域管理</div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-xl-2">
+                <a th:href="@{/order/list}" class="card text-center text-decoration-none h-100">
+                    <div class="card-body py-4">
+                        <i class="bi bi-receipt" style="font-size:32px;color:#fd7e14;"></i>
+                        <div class="mt-2 fw-semibold" style="color:#333;">订单计费管理</div>
+                        <div class="text-muted" style="font-size:12px;">订单查询 / 缴费结算</div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-xl-2" th:if="${session.loginUser != null and session.loginUser.roleId == 1}">
+                <a th:href="@{/order/rule}" class="card text-center text-decoration-none h-100">
+                    <div class="card-body py-4">
+                        <i class="bi bi-cash-coin" style="font-size:32px;color:#20c997;"></i>
+                        <div class="mt-2 fw-semibold" style="color:#333;">收费规则配置</div>
+                        <div class="text-muted" style="font-size:12px;">阶梯计费 / 封顶设置</div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-xl-2">
+                <a th:href="@{/stat/index}" class="card text-center text-decoration-none h-100">
+                    <div class="card-body py-4">
+                        <i class="bi bi-bar-chart-line" style="font-size:32px;color:#6f42c1;"></i>
+                        <div class="mt-2 fw-semibold" style="color:#333;">数据统计</div>
+                        <div class="text-muted" style="font-size:12px;">营收 / 车流看板</div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-xl-2">
+                <a th:href="@{/stat/blacklist}" class="card text-center text-decoration-none h-100">
+                    <div class="card-body py-4">
+                        <i class="bi bi-person-x" style="font-size:32px;color:#dc3545;"></i>
+                        <div class="mt-2 fw-semibold" style="color:#333;">黑名单管理</div>
+                        <div class="text-muted" style="font-size:12px;">违规拦截 / 解禁</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- 系统说明 -->
+        <div class="card mt-4">
+            <div class="card-header"><i class="bi bi-info-circle me-1"></i>系统说明</div>
+            <div class="card-body" style="font-size:14px;color:#4a5568;">
+                <ul class="mb-0" style="line-height:2;">
+                    <li><strong>车辆进出管理</strong>：登记车辆入场，自动分配空闲车位并生成停车订单；黑名单车辆禁止入场。</li>
+                    <li><strong>车位管理</strong>：维护车位编号与区域，实时更新空闲 / 占用 / 故障三种状态。</li>
+                    <li><strong>订单计费管理</strong>：停车订单自动生成，支持阶梯计费与缴费结算，缴费后自动释放车位。</li>
+                    <li><strong>收费规则配置</strong>：自定义首小时费用、续时单价、单日封顶与月租价格。</li>
+                    <li><strong>数据统计</strong>：汇总今日订单、今日营收、未支付订单等核心运营指标。</li>
+                    <li><strong>黑名单管理</strong>：录入欠费 / 违规车辆，入场时自动拦截。</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+</div>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>
