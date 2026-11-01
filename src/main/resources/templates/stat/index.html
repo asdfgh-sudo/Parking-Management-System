@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="common/layout :: head('数据统计 - 停车场管理系统')"></head>
+<body>
+<nav th:replace="common/layout :: topbar"></nav>
+<div class="d-flex">
+    <aside th:replace="common/layout :: sidebar('stat')"></aside>
+    <main class="flex-grow-1 content-area">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="page-title mb-0"><i class="bi bi-bar-chart-line me-2"></i>数据统计</h4>
+            <span class="text-muted" style="font-size:13px;">
+                统计日期：<span th:text="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">2026-01-01</span>
+            </span>
+        </div>
+
+        <!-- 核心指标卡片 -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-4 col-xl-2">
+                <div class="card text-center border-start border-4 border-primary">
+                    <div class="card-body py-3">
+                        <div class="text-muted" style="font-size:13px;"><i class="bi bi-receipt me-1"></i>今日订单</div>
+                        <div class="fs-4 fw-bold" style="color:#0d6efd;" th:text="${todayOrder}">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-xl-2">
+                <div class="card text-center border-start border-4 border-success">
+                    <div class="card-body py-3">
+                        <div class="text-muted" style="font-size:13px;"><i class="bi bi-cash-stack me-1"></i>今日营收</div>
+                        <div class="fs-4 fw-bold text-success" th:text="'¥' + ${todayIncome}">¥0.00</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-xl-2">
+                <div class="card text-center border-start border-4 border-warning">
+                    <div class="card-body py-3">
+                        <div class="text-muted" style="font-size:13px;"><i class="bi bi-hourglass-split me-1"></i>未支付订单</div>
+                        <div class="fs-4 fw-bold text-warning" th:text="${unpaidCount}">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-xl-2">
+                <div class="card text-center border-start border-4 border-info">
+                    <div class="card-body py-3">
+                        <div class="text-muted" style="font-size:13px;"><i class="bi bi-collection me-1"></i>累计订单</div>
+                        <div class="fs-4 fw-bold" style="color:#0dcaf0;" th:text="${totalOrder}">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-xl-2">
+                <div class="card text-center border-start border-4 border-secondary">
+                    <div class="card-body py-3">
+                        <div class="text-muted" style="font-size:13px;"><i class="bi bi-cash-coin me-1"></i>累计营收</div>
+                        <div class="fs-4 fw-bold" style="color:#6c757d;" th:text="'¥' + ${totalIncome}">¥0.00</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-xl-2">
+                <div class="card text-center border-start border-4 border-danger">
+                    <div class="card-body py-3">
+                        <div class="text-muted" style="font-size:13px;"><i class="bi bi-person-x me-1"></i>黑名单车辆</div>
+                        <div class="fs-4 fw-bold text-danger" th:text="${blackCount}">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 今日订单明细 -->
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-clock-history me-1"></i>今日停车订单明细
+                <span class="badge bg-secondary ms-2" th:text="'共 ' + ${#lists.size(todayList)} + ' 条'">共 0 条</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <colgroup>
+                            <col style="width:10%">
+                            <col style="width:20%">
+                            <col style="width:18%">
+                            <col style="width:18%">
+                            <col style="width:14%">
+                            <col style="width:20%">
+                        </colgroup>
+                        <thead>
+                        <tr>
+                            <th>订单ID</th>
+                            <th>订单号</th>
+                            <th>车牌号</th>
+                            <th>入场时间</th>
+                            <th>金额</th>
+                            <th>状态</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="o : ${todayList}">
+                            <td th:text="${o.orderId}">1</td>
+                            <td class="text-muted" style="font-size:12px;" th:text="${o.orderNo}">ORD20260101001</td>
+                            <td><span class="badge text-bg-dark" th:text="${o.carNum}">蒙A12345</span></td>
+                            <td th:text="${#temporals.format(o.enterTime, 'HH:mm:ss')}">08:00:00</td>
+                            <td th:text="'¥' + ${o.totalAmount != null ? o.totalAmount : '0.00'}">¥5.00</td>
+                            <td>
+                                <span th:if="${o.payStatus == 0}" class="badge text-bg-warning">未支付</span>
+                                <span th:if="${o.payStatus == 1}" class="badge text-bg-success">已支付</span>
+                                <span th:if="${o.payStatus == 2}" class="badge text-bg-danger">欠费</span>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(todayList)}">
+                            <td colspan="6" class="text-center text-muted py-4">今日暂无订单</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>
