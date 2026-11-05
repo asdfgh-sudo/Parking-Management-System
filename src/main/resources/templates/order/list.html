@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="common/layout :: head('订单计费管理 - 停车场管理系统')"></head>
+<body>
+<nav th:replace="common/layout :: topbar"></nav>
+<div class="d-flex">
+    <aside th:replace="common/layout :: sidebar('order')"></aside>
+    <main class="flex-grow-1 content-area">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="page-title mb-0"><i class="bi bi-receipt me-2"></i>订单计费管理</h4>
+        </div>
+
+        <!-- 筛选 -->
+        <div class="card mb-4">
+            <div class="card-body py-3">
+                <form class="row g-3 align-items-end" th:action="@{/order/list}" method="get">
+                    <div class="col-md-3">
+                        <label class="form-label">订单状态</label>
+                        <select name="payStatus" class="form-select">
+                            <option value="">全部状态</option>
+                            <option value="0" th:selected="${param.payStatus != null and param.payStatus[0] == '0'}">未支付</option>
+                            <option value="1" th:selected="${param.payStatus != null and param.payStatus[0] == '1'}">已支付</option>
+                            <option value="2" th:selected="${param.payStatus != null and param.payStatus[0] == '2'}">欠费</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">车牌号</label>
+                        <input type="text" name="carNum" class="form-control" placeholder="按车牌搜索" th:value="${param.carNum}">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-search me-1"></i>查询
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 订单列表 -->
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-list-columns me-1"></i>停车订单列表
+                <span class="badge bg-secondary ms-2" th:text="'共 ' + ${#lists.size(list)} + ' 条订单'">共 0 条订单</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <colgroup>
+                            <col style="width:6%">
+                            <col style="width:16%">
+                            <col style="width:12%">
+                            <col style="width:14%">
+                            <col style="width:14%">
+                            <col style="width:10%">
+                            <col style="width:10%">
+                            <col style="width:12%">
+                            <col style="width:6%">
+                        </colgroup>
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>订单号</th>
+                            <th>车牌号</th>
+                            <th>入场时间</th>
+                            <th>出场时间</th>
+                            <th>停车时长</th>
+                            <th>应付金额</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="o : ${list}">
+                            <td th:text="${o.orderId}">1</td>
+                            <td class="text-muted" style="font-size:12px;" th:text="${o.orderNo}">ORD20260101001</td>
+                            <td><span class="badge text-bg-dark" th:text="${o.carNum}">蒙A12345</span></td>
+                            <td th:text="${#temporals.format(o.enterTime, 'MM-dd HH:mm')}">01-01 08:00</td>
+                            <td>
+                                <span th:if="${o.exitTime != null}" th:text="${#temporals.format(o.exitTime, 'MM-dd HH:mm')}">01-01 10:00</span>
+                                <span th:if="${o.exitTime == null}" class="text-muted">—</span>
+                            </td>
+                            <td th:text="${o.parkDuration != null ? (o.parkDuration / 60) + '小时' + (o.parkDuration % 60) + '分' : '—'}">2小时30分</td>
+                            <td class="fw-semibold" style="color:#dc3545;" th:text="'¥' + ${o.totalAmount != null ? o.totalAmount : '0.00'}">¥20.00</td>
+                            <td>
+                                <span th:if="${o.payStatus == 0}" class="badge text-bg-warning">未支付</span>
+                                <span th:if="${o.payStatus == 1}" class="badge text-bg-success">已支付</span>
+                                <span th:if="${o.payStatus == 2}" class="badge text-bg-danger">欠费</span>
+                            </td>
+                            <td>
+                                <a th:if="${o.payStatus != 1}" th:href="@{/order/pay/{id}(id=${o.orderId})}"
+                                   class="btn btn-sm btn-primary" onclick="return confirm('确认对该订单进行结算缴费？');">
+                                    <i class="bi bi-cash-coin me-1"></i>结算
+                                </a>
+                                <span th:if="${o.payStatus == 1}" class="text-success" style="font-size:13px;">
+                                    <i class="bi bi-check-circle"></i>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(list)}">
+                            <td colspan="9" class="text-center text-muted py-4">暂无订单数据</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>
