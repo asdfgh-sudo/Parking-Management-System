@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="common/layout :: head('车辆进出管理 - 停车场管理系统')"></head>
+<body>
+<nav th:replace="common/layout :: topbar"></nav>
+<div class="d-flex">
+    <aside th:replace="common/layout :: sidebar('car')"></aside>
+    <main class="flex-grow-1 content-area">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="page-title mb-0"><i class="bi bi-car-front me-2"></i>车辆进出管理</h4>
+        </div>
+
+        <!-- 提示信息 -->
+        <div th:if="${param.msg != null and !#strings.isEmpty(param.msg[0])}"
+             class="alert alert-warning py-2" role="alert">
+            <i class="bi bi-exclamation-triangle me-1"></i><span th:text="${param.msg[0]}">提示</span>
+        </div>
+
+        <!-- 车辆入场登记 -->
+        <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-box-arrow-in-right me-1"></i>车辆入场登记</div>
+            <div class="card-body">
+                <form th:action="@{/car/enter}" method="post" class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label">车牌号</label>
+                        <input type="text" name="carNum" class="form-control" placeholder="如 蒙A12345" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">车辆类型</label>
+                        <select name="carType" class="form-select">
+                            <option value="1">临时车</option>
+                            <option value="2">月租车</option>
+                            <option value="3">免费车</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">操作员</label>
+                        <input type="text" class="form-control"
+                               th:value="${session.loginUser != null ? session.loginUser.realName : ''}"
+                               disabled>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="bi bi-check-circle me-1"></i>登记入场
+                        </button>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-text">
+                            车辆入场后将自动分配空闲车位并生成停车订单；黑名单车辆将被系统拦截。
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 进出记录列表 -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-clock-history me-1"></i>车辆进出记录</span>
+                <form class="d-flex" th:action="@{/car/record}" method="get">
+                    <input type="text" name="carNum" class="form-control form-control-sm me-2"
+                           style="width:180px;" placeholder="按车牌号搜索" th:value="${param.carNum}">
+                    <button type="submit" class="btn btn-sm btn-outline-primary">查询</button>
+                </form>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <colgroup>
+                            <col style="width:8%">
+                            <col style="width:16%">
+                            <col style="width:12%">
+                            <col style="width:18%">
+                            <col style="width:18%">
+                            <col style="width:12%">
+                            <col style="width:16%">
+                        </colgroup>
+                        <thead>
+                        <tr>
+                            <th>记录ID</th>
+                            <th>车牌号</th>
+                            <th>车辆类型</th>
+                            <th>入场时间</th>
+                            <th>出场时间</th>
+                            <th>车位ID</th>
+                            <th>操作员</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="r : ${list}">
+                            <td th:text="${r.recordId}">1</td>
+                            <td><span class="badge text-bg-dark" th:text="${r.carNum}">蒙A12345</span></td>
+                            <td>
+                                <span th:if="${r.carType == 1}" class="badge text-bg-primary">临时车</span>
+                                <span th:if="${r.carType == 2}" class="badge text-bg-info">月租车</span>
+                                <span th:if="${r.carType == 3}" class="badge text-bg-success">免费车</span>
+                            </td>
+                            <td th:text="${#temporals.format(r.enterTime, 'yyyy-MM-dd HH:mm:ss')}">2026-01-01 08:00:00</td>
+                            <td>
+                                <span th:if="${r.exitTime != null}" th:text="${#temporals.format(r.exitTime, 'yyyy-MM-dd HH:mm:ss')}">2026-01-01 10:00:00</span>
+                                <span th:if="${r.exitTime == null}" class="badge text-bg-warning">在场内</span>
+                            </td>
+                            <td th:text="${r.spaceId}">3</td>
+                            <td th:text="${r.operator}">张三</td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(list)}">
+                            <td colspan="7" class="text-center text-muted py-4">暂无进出记录</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>
