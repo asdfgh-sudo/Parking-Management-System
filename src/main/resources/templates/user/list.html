@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="common/layout :: head('用户管理 - 停车场管理系统')"></head>
+<body>
+<nav th:replace="common/layout :: topbar"></nav>
+<div class="d-flex">
+    <aside th:replace="common/layout :: sidebar('user')"></aside>
+    <main class="flex-grow-1 content-area">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="page-title mb-0"><i class="bi bi-people me-2"></i>用户管理</h4>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                <i class="bi bi-plus-lg me-1"></i>新增用户
+            </button>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-person-lines-fill me-1"></i>系统账号列表
+                <span class="badge bg-secondary ms-2" th:text="'共 ' + ${#lists.size(list)} + ' 个账号'">共 0 个账号</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <colgroup>
+                            <col style="width:8%">
+                            <col style="width:16%">
+                            <col style="width:16%">
+                            <col style="width:16%">
+                            <col style="width:14%">
+                            <col style="width:16%">
+                            <col style="width:14%">
+                        </colgroup>
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>登录账号</th>
+                            <th>姓名</th>
+                            <th>角色</th>
+                            <th>状态</th>
+                            <th>创建时间</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="u : ${list}">
+                            <td th:text="${u.userId}">1</td>
+                            <td th:text="${u.username}">admin</td>
+                            <td th:text="${u.realName}">管理员</td>
+                            <td>
+                                <span th:if="${u.roleId == 1}" class="badge text-bg-info">超级管理员</span>
+                                <span th:if="${u.roleId == 2}" class="badge text-bg-secondary">收费员</span>
+                            </td>
+                            <td>
+                                <span th:if="${u.status == 1}" class="badge text-bg-success">正常</span>
+                                <span th:if="${u.status == 0}" class="badge text-bg-danger">已禁用</span>
+                            </td>
+                            <td th:text="${#temporals.format(u.createTime, 'yyyy-MM-dd HH:mm')}">2026-01-01 10:00</td>
+                            <td>
+                                <a th:href="@{/auth/userStatus/{id}/{status}(id=${u.userId}, status=${u.status == 1 ? 0 : 1})}"
+                                   th:classappend="${u.status == 1 ? 'btn-outline-warning' : 'btn-outline-success'}"
+                                   class="btn btn-sm" th:title="${u.status == 1 ? '禁用账号' : '启用账号'}">
+                                    <i class="bi" th:classappend="${u.status == 1 ? 'bi-pause-circle' : 'bi-play-circle'}"></i>
+                                </a>
+                                <a th:if="${u.userId != session.loginUser.userId}"
+                                   th:href="@{/auth/userDelete/{id}(id=${u.userId})}"
+                                   class="btn btn-sm btn-outline-danger"
+                                   onclick="return confirm('确定删除该账号吗？');">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(list)}">
+                            <td colspan="7" class="text-center text-muted py-4">暂无用户数据</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- 新增用户模态框 -->
+<div class="modal fade" id="addUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form th:action="@{/auth/userAdd}" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-person-plus me-1"></i>新增用户</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">登录账号</label>
+                        <input type="text" name="username" class="form-control" placeholder="如 zhangsan" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">姓名</label>
+                        <input type="text" name="realName" class="form-control" placeholder="如 张三" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">角色</label>
+                        <select name="roleId" class="form-select" required>
+                            <option value="2">收费员</option>
+                            <option value="1">超级管理员</option>
+                        </select>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label">初始密码</label>
+                        <input type="text" name="password" class="form-control" value="123456">
+                        <div class="form-text">默认初始密码为 123456</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>
